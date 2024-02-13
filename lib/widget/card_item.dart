@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
+import 'package:local_storage/controller/note_controller.dart';
+import 'package:local_storage/model/note_model.dart';
 import '../view/add_edit_screen.dart';
+import '../view/home_screen.dart';
 
 class CartItem extends StatelessWidget {
-  const CartItem({super.key});
+  const CartItem({super.key, required this.model});
+  final NoteModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,7 @@ class CartItem extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddEditScreen(),
+                    builder: (context) => AddEditScreen(noteModel: model),
                   ),
                 );
               },
@@ -31,7 +34,16 @@ class CartItem extends StatelessWidget {
             ),
             SlidableAction(
               borderRadius: BorderRadius.circular(10),
-              onPressed: (context) {},
+              onPressed: (context) async {
+                await NoteController()
+                    .deleteData(model.id)
+                    .whenComplete(() => Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(),
+                        ),
+                        (route) => false));
+              },
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: Icons.delete_forever,
@@ -39,7 +51,7 @@ class CartItem extends StatelessWidget {
             ),
           ],
         ),
-        child: const SizedBox(
+        child: SizedBox(
           width: double.infinity,
           child: Card(
             color: Color.fromARGB(255, 234, 234, 234),
@@ -49,14 +61,17 @@ class CartItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Note Title',
-                    style: TextStyle(
+                    model.title,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Text('Note description'),
-                  Text('date time'),
+                  Text(
+                    model.description,
+                    maxLines: 1,
+                  ),
+                  Text(model.time),
                 ],
               ),
             ),

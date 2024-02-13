@@ -12,12 +12,14 @@ class NoteModel {
   });
   // using for add & update data
   Map<String, dynamic> fromJson() {
-    return ({
+    return (
+      {
       'id': id,
       'title': title,
       'description': description,
       'time': time
-    });
+    }
+    );
   }
 
   // fetch data

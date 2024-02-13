@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:local_storage/controller/note_controller.dart';
+import 'package:local_storage/model/note_model.dart';
 import 'package:local_storage/view/add_edit_screen.dart';
 import 'package:local_storage/widget/card_item.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Future<List<NoteModel>>? list;
+  late NoteController noteController;
+  Future<void> onRefresh() async {
+    noteController = NoteController();
+    list = noteController.getData();
+  }
+
+  @override
+  void initState() {
+    onRefresh();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +55,26 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          CartItem(),
-        ],
+      body: FutureBuilder<List<NoteModel>>(
+        future: list,
+        builder: (context, AsyncSnapshot<List<NoteModel>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Icon(Icons.error),
+            );
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) => CartItem(
+                model: snapshot.data![index],
+              ),
+            );
+          }
+        },
       ),
     );
   }
